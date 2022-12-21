@@ -52,21 +52,7 @@
   <!--==========================
   Hero Section
   ============================-->
-  <section id="hero">
-    <div class="hero-container">
-      <div class="wow fadeIn">
-        
-        <h1 style="font-size:5vw;">Marco Ascuy</h1>
-        <h1>Portfolio</h1>
-        <h3>Data Analyst well versed in SQL, Python and Power BI. Learning HTML + CSS </h3>
-        <div class="actions">
-          <a href="#about" class="btn-get-started">Get Started</a>
-          <a href="#services" class="btn-services">Our Services</a>
-          <a href="#portfolio" class="btn-services">Portfolio</a>
-        </div>
-      </div>
-    </div>
-  </section>
+
 
   <!--==========================
   Header Section
@@ -82,10 +68,10 @@
 
       <nav id="nav-menu-container">
         <ul class="nav-menu">
-          <li class="menu-active"><a href="#hero">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#services">Services</a></li>
-          <li><a href="#portfolio">Portfolio</a></li>
+          <li class="menu-active"><a href="index.html">Home</a></li>
+          <li><a href="index.html#about">About</a></li>
+          <li><a href="index.html#services">Services</a></li>
+          <li><a href="index.html#portfolio">Portfolio</a></li>
           <li class="menu-has-children"><a href="">About Me</a>
             <ul>
               <li><a href="blog.html">Blog</a></li>
@@ -101,7 +87,7 @@
               <li><a href="#">Drop Down 5</a></li>
             </ul>
           </li>
-          <li><a href="#contact">Contact Me</a></li>
+          <li><a href="index.html#contact">Contact Me</a></li>
         </ul>
       </nav>
       <!-- #nav-menu-container -->
@@ -116,134 +102,106 @@
     <div class="container wow fadeInUp">
       <div class="row">
         <div class="col-md-12">
-          <h3 class="section-title">About</h3>
+          <h3 class="section-title">Análisis Exploratorio de Resultados de Fútbol con Python</h3>
           <div class="section-title-divider"></div>
-          <p class="section-description">Un poco de mí.</p>
+          <p class="section-description">Un breve análisis de fútbol internacional. En construcción (19/12) </p>
+          <p>En este proyecto se estudiará el rendimiento de las distintas selecciones nacionales de fútbol. Utilizando librerías como Pandas,
+             Numpy y Matplotlib, se procesarán, agruparán y analizarán los resultados obtenidos por cada selección para posteriormente visualizarlos. El notebook completo está  disponible
+            <a href = "https://github.com/marcoascuy/Python-Project/blob/main/Untitled.ipynb"> acá
+            </a>
+          </p>
         </div>
       </div>
     </div>
     <div class="container about-container wow fadeInUp">
       <div class="row">
-
-        <div class="col-lg-6 about-img">
-          <img src="img/about2.jpg" alt="">
-        </div>
-
         <div class="col-md-6 about-content">
-          <h2 class="about-title">Data Analyst</h2>
-          <p class="about-text">
-            Hola! Mi nombre es Marco Ascuy. Soy Ingeniero Civil Industrial de profesión e inquieto de vocación. Tengo un alto interés en la industria tecnológica, en la innovación con datos y en el cómo se pueden utilizar estos en todos los ámbitos de la vida. Me apasionan los deportes, el cine y la literatura.
-          </p>
-          <p class="about-text">
-            Poseo experiencia en proyectos universitarios, destacando mi capacidad analítica y mi adaptabilidad a los equipos de trabajos. Creo en el trabajo colaborativo por sobre todas las cosas y en la empatía como principal motor de trabajo.  
-          </p>
-          <p class="about-text">
-            Manejo herramientas tales como SQL, Python, R y Power BI a nivel intermedio. Además del manejo avanzado del paquete Office.
-          </p>
+          <h2 class="about-title">Conociendo nuestros datos</h2>
         </div>
       </div>
+      <p>
+        Los datos utilizados son descargados directamente desde <a href="https://www.kaggle.com/datasets/martj42/international-football-results-from-1872-to-2017">Kaggle: International Football Results from 
+          1872 to 2022
+        </a>
+        Este dataset es actualizado períodicamente e incluye la historia de más de 150 años de partidos de fútbol. 
+      </p>
+      <p> En primer lugar, se importan las librerías que son utilizadas en este proyecto y que ayudarán a realizar el análisis de los datos.</p>
+      <pre> 
+        import pandas as pd
+        import numpy as np
+        import matplotlib as mlt 
+        import plotly.express as px
+        import plotly.graph_objects as go
+     </pre>
+     <p> En segundo lugar, se importan los archivos descargados previamente y se explora la estructura de los datos que estos tienen.</p>
+     <pre> 
+      results = pd.read_csv('results.csv')
+      goalscorers = pd.read_csv('goalscorers.csv')
+      shootouts = pd.read_csv('shootouts.csv')
+     </pre>
+     <p>Tal como se puede apreciar a continuación, el archivo de resultados contiene la fecha en la que fue disputado el partido, los equipos contendientes, los goles que anotaron cada uno de estos,
+       el torneo en el que se jugó el partido, la ciudad, el país y si el terreno fue neutral.
+     </p>
+     <pre>
+      results.head(5)
+     </pre>
+     <figure>
+      <img src="img/eda-results-1.jpg" alt="a" width="650" height="200"/>
+      <figcaption>Figura 1: Primeros 5 partidos registrados a nivel de selecciones internacionales </figcaption>
+     </figure>
+     <p>
+     <p>Es posible ver que el <a href="https://es.wikipedia.org/wiki/Primer_partido_internacional_de_f%C3%BAtbol">primer partido oficial de la historia entre selecciones</a> fue el entretenídisimo 0-0 entre Escocia e Inglaterra en noviembre de 1872.
+      Encuentro que fue disputado en Glasgow y que después se repetiría varias veces. Por otro lado, el último partido registrado es
+      <a href="https://es.wikipedia.org/wiki/Anexo:Final_de_la_Copa_Mundial_de_F%C3%BAtbol_de_2022"> la gran final del Mundial de Qatar 2022</a>,
+      que terminó por coronar a Lionel Messi como el jugador más importante de la historia.
+     </p>
+     <pre>
+      results.sort_values(by='date', ascending=False).head(5)
+     </pre>
+     <figure>
+      <img src="img/eda-results-2.jpg" alt="a" width="650" height="200"/>
+      <figcaption>Figura 2: Últimos 5 partidos registrados a nivel de selecciones internacionales. Fecha de Actualización 19/12/2022 </figcaption>
+     </figure>
+     <p>
+     <p> 
+      El archivo de los goleadores (goalscorers) tiene la información de los goles convertidos en los partidos internacionales, quién convirtió 
+      el tanto, el minuto, los equipos involucrados, si fue en propia puerta y si fue de penal.
+     </p>
+     </p>
+     <pre>
+      goalscorers.head(5)
+     </pre>
+     <figure>
+      <img src="img/eda-results-3.jpg" alt="a" width="650" height="200"/>
+      <figcaption>Figura 3: Primeros 5 goles registrados en la tabla de goleadores </figcaption>
+     </figure>
+     <p>
+     <p>
+      Los primeros goles registrados en este dataset corresponden al <a href="https://es.wikipedia.org/wiki/Campeonato_Sudamericano_1916">Campeonato Sudamericano de 1916</a>, evento conocido como la primera Copa América de la historia.
+      El primer gol fue del uruguayo José Piendibene en el minuto 44 en la victoria 4 a 0 de Uruguay ante Chile, en la primera fecha.
+      Por otro lado, el último gol registrado fue el penal marcado por Kylian Mbappé en el minuto 118 en la final del mundo de 2022, tanto que a posteriori serviría para llevar a tanda de penales
+      el encuentro.
+     </p>
+     </p>
+     <pre>
+      goalscorers.sort_values(by='date', ascending=False).head(5)
+     </pre>
+     <figure>
+      <img src="img/eda-results-4.jpg" alt="a" width="650" height="200"/>
+      <figcaption>Figura 4: Últimos goles registrados en la tabla de goleadores</figcaption>
+     </figure>
+     </p>
     </div>
   </section>
 
   <!--==========================
   Services Section
   ============================-->
-  <section id="services">
-    <div class="container wow fadeInUp">
-      <div class="row">
-        <div class="col-md-12">
-          <h3 class="section-title">Services</h3>
-          <div class="section-title-divider"></div>
-          <p class="section-description">Algunos de los servicios prestados</p>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-4 service-item">
-          <div class="service-icon"><i class="fa fa-search"></i></div>
-          <h4 class="service-title"><a href="">Minería de Datos</a></h4>
-          <p class="service-description">Exploración, manipulación  y análisis de datos contingentes </p>
-        </div>
-        <div class="col-md-4 service-item">
-          <div class="service-icon"><i class="fa fa-cogs"></i></div>
-          <h4 class="service-title"><a href="">Limpieza y Procesamiento de datos</a></h4>
-          <p class="service-description">Recopilación, limpieza y determinación de los datos necesarios para responder la pregunta investigativa</p>
-        </div>
-        <div class="col-md-4 service-item">
-          <div class="service-icon"><i class="fa fa-line-chart"></i></div>
-          <h4 class="service-title"><a href="">Visualización de resultados</a></h4>
-          <p class="service-description">Interpretación de resultados y comunicación de estos útiles en la toma de decisiones</p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!--==========================
-  Subscrbe Section
-  ============================-->
-
-
-  <!--==========================
-  Porfolio Section
-  ============================-->
-  <section id="portfolio">
-    <div class="container wow fadeInUp">
-      <div class="row">
-        <div class="col-md-12">
-          <h3 class="section-title">Portfolio</h3>
-          <div class="section-title-divider"></div>
-          <p class="section-description">Algunos de los proyectos realizados con técnicas de ciencia de datos</p>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-md-3">
-          <a class="portfolio-item" style="background-image: url(img/seleccion.jpg);" href="project_sports.html">
-            <div class="details"> 
-              <h4>Proyecto 1</h4>
-              <span>Análisis Exploratorio de partidos internacionales de fútbol con Python</span>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3">
-          <a class="portfolio-item" style="background-image: url(img/covid19.jpg);" href="https://github.com/marcoascuy/SQL-Project">
-            <div class="details">
-              <h4>Proyecto 2</h4>
-              <span>Análisis Exploratorio de Casos COVID y Proceso Vacunatorio con SQL</span>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3">
-          <a class="portfolio-item" style="background-image: url(img/cerveza.jpg);" href="https://public.tableau.com/app/profile/marco.ascuy/viz/ConsumodeAlcoholDashboard1/Dashboard1">
-            <div class="details">
-              <h4>Proyecto 3</h4>
-              <span>Análisis del consumo de alcohol mundial mediante herramientas de visualización como Tableau</span>
-            </div>
-          </a>
-        </div>
-
-        <div class="col-md-3">
-          <a class="portfolio-item" style="background-image: url(img/car.jpg);" href="">
-            <div class="details">
-              <h4>Proyecto 4</h4>
-              <span>Predicción de precios de automóviles mediante modelos de Machine Learning (En construcción)</span>
-            </div>
-          </a>
-        </div>
-
-
-
-      </div>
-    </div>
-  </section>
-
+  
   <!--==========================
   Testimonials Section
   ============================-->
- 
+
 
   <!--==========================
   Team Section
