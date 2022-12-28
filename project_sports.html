@@ -190,8 +190,202 @@
       <img src="img/eda-results-4.jpg" alt="a" width="650" height="200"/>
       <figcaption>Figura 4: Últimos goles registrados en la tabla de goleadores</figcaption>
      </figure>
+     <p>
+     <p>
+      Por último, como se puede ver a continuación, el archivo de las definiciones (shootouts) tiene la información de los duelos que 
+      terminaron en definiciones a penales.
+      El primer ganador en un partido a definición fue Taiwan en 1967, quien le ganó a India tras empatar 1-1 en los 90'. Por otro lado, el último 
+      ganador por penales fue Argentina, quién ganó a Francia y consiguió su tercera Copa Mundial luego de empatar 3-3 en los 120' de 
+      partido más alargue. Han habido, según la data disponible, 547 definiciones de este tipo a la fecha.
+     </p>
+     </p>
+     <p>
+     <pre>
+      shootouts.head(5)
+     </pre>
+     <figure>
+      <img src="img/eda-results-5.jpg" alt="a"/>
+      <figcaption>Figura 5: Primeras definiciones por penalties registradas en la tabla shootouts</figcaption>
+     </figure>
+     </p>
+     <p>
+     <pre>
+      shootouts.sort_values(by='date', ascending=False).head(5)
+     </pre>
+      <figure>
+        <img src="img/eda-results-6.jpg" alt="a" />
+        <figcaption>Figura 6: Últimas 5 definiciones por penalties registradas en la tabla shootouts. Actualización al 19/12</figcaption>
+       </figure>
+     </p>       
      </p>
     </div>
+    <div class="container about-container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-6 about-content">
+          <h2 class="about-title">Transformación de nuestros datos</h2>
+        </div>
+      </div>
+      <h3 class="about-title">1. Funciones</h3>
+      <p>
+       Se crean funciones que ayudan a manejar los datos que se tienen para contestar posteriormente las preguntas que pueden ser de interés. 
+       Estas funciones generarán transformaciones en el dataframe para amoldarlo según sea necesario. Por ejemplo, según se puede ver en la 
+       Figura 1, la tabla results solo tiene la cantidad de goles del partido y no quien salió victorioso ni quien perdió el encuentro. Para 
+       ello se definen 3 funciones: game_result, winner y loser.
+      </p>
+       <h4><b>Resultado Final de Partido (game_result)</b></h4>
+        <pre>
+          def game_result(home_score, away_score): # define el resultado final considerando los goles anotados
+            if home_score &gt; away_score: return 'Home'
+            if home_score &lt; away_score: return 'Away'
+            else: return 'Draw'
+        </pre>
+       <h4><b>Ganador del partido (winner)</b></h4>  
+        <pre>
+         def winner(game_result, home_team, away_team): # define el ganador del encuentro
+           if game_result == 'Home': return home_team
+           elif game_result == 'Away': return away_team
+           else: return 'None'
+       </pre>   
+       <h4><b>Perdedor del partido (loser)</b></h4>  
+        <pre>
+          def loser(game_result, home_team, away_team): # define quien perdió el partido
+          if game_result == 'Home': return away_team
+          elif game_result == 'Away': return home_team
+          else: return 'None'
+       </pre> 
+       <h3 class="about-title">2. Creación de columnas</h3>
+       <h4><b>Separación de fecha en mes, año y día de semana</b></h4>
+        <p>Se crea una copia del dataframe results y se añaden las columnas usando DatetimeIndex</p>
+        <pre>
+          df = results.copy()
+          df['year'] = pd.DatetimeIndex(df['date']).year
+          df['month'] = pd.DatetimeIndex(df['date']).month_name()
+          df['day'] = pd.DatetimeIndex(df["date"]).day_name()
+        </pre>  
+        <p>El resultado se puede apreciar en la Figura 7, donde se puede ver que el primer partido de la historia fue un Sábado de Noviembre</p>
+        <figure>
+          <img src="img/transformation-dates.jpg" alt="a" />
+          <figcaption>Figura 7: Resultados Internacionales de partidos de fútbol</figcaption>
+        </figure>
+        <p>
+        <h3 class="about-title">3. Aplicación de funciones a dataframe</h3> 
+         <p>Para aplicar las funciones creadas previamente utiliza la función apply al dataframe df y se muestran los resultados. 
+          Los comandos utilizados son los siguientes:
+         </p>
+        </p>
+        <pre>
+          df['game_result'] = df.apply(lambda row: game_result(row["home_score"],row["away_score"]), axis=1)
+          df['winner'] = df.apply(lambda row: winner(row["game_result"], row["home_team"], row["away_team"]), axis=1) 
+          df['loser'] = df.apply(lambda row: loser(row["game_result"], row["home_team"], row["away_team"]), axis=1)
+        </pre>
+        <p>
+        <figure>
+          <img src="img/transformation-results.jpg" alt="a"  width="1050" height="250"/>
+          <figcaption>Figura 8: Resultados Internacionales de partiidos de fútbol tras aplicar funciones</figcaption>
+        </figure>
+        </p>
+        <h3 class="about-title">4. Agregación de estadísticas por país</h3>
+        <h4><b>Cantidad de Partidos ganados, empatados y perdidos por selección nacional</b></h4>
+        <p>
+          Se desea agregar la cantidad de encuentros ganados, empatados y perdidos por cada país, para eso se realiza una serie de pasos, 
+          entre los que se encuentran la selección de las columnas a utilizar, el conteo de los resultados obtenidos por cada país,
+          el pivoteo de estos, el reemplazo de missing values por 0's y el renombramiento de columnas. El análisis se hace primero para partidos
+          de local, después de visita y finalmente se agregan ambos. 
+        </p>
+        <pre> 
+          teams = df.copy() # Se copia el dataframe df anterior
+        </pre>
+        <h4><b>Partidos de Local</b></h4>
+        <pre>
+          # se realiza un conteo de las victorias, empates y derrotas de los equipos en sus partidos de local y se agrupan
+          home_teams_goals = teams[['home_team', 'home_score', 'away_score','game_result', 'winner']] # selección de columnas
+          home_teams_goals = home_teams_goals.groupby(['home_team', 'game_result']).count() # agrupación
+          home_teams_goals = home_teams_goals.reset_index() # se resetea el índice, esto dado que se agrupó anteriormente
+          home_teams_goals.rename(columns = {'home_score':'result_count'}, inplace = True) # se renombra columna
+          
+          home_teams_goals = home_teams_goals[['home_team', 'game_result', 'result_count']]
+          home_teams_goals = pd.pivot_table(home_teams_goals, values='result_count', index='home_team',
+                    columns=['game_result'], aggfunc=np.sum) # se pivotea tabla con columnas victorias, empates, derrotas
+          home_teams_goals = home_teams_goals.reset_index()
+          home_teams_goals.rename(columns = {'home_team':'team', 'Away':'Home_Lose', 'Draw':'Home_Draw', 'Home':'Home_Win'}, inplace = True)
+          home_teams_goals.fillna(0, inplace=True) # se reemplazan nulos por ceros
+        </pre>
+        <h4><b>Partidos de visita</b></h4>
+        <pre>
+          away_teams_goals = teams[['away_team', 'home_score', 'away_score','game_result', 'winner']]
+          away_teams_goals = away_teams_goals.groupby(['away_team', 'game_result']).count()
+          away_teams_goals = away_teams_goals.reset_index()
+          away_teams_goals.rename(columns = {'away_score':'result_count'}, inplace = True)
+
+          away_teams_goals = away_teams_goals[['away_team', 'game_result', 'result_count']]
+          away_teams_goals = pd.pivot_table(away_teams_goals, values='result_count', index='away_team',
+                    columns=['game_result'], aggfunc=np.sum)
+          away_teams_goals = away_teams_goals.reset_index()
+          away_teams_goals.rename(columns = {'away_team':'team', 'Away':'Away_Win', 'Draw':'Away_Draw', 'Home':'Away_Lose'}, inplace = True)
+          away_teams_goals.fillna(0, inplace=True)
+        </pre>
+        <p>
+          Se unen ambos dataframes utilizando el método merge con una unión inner, la cual toma la intersección de ambos conjuntos.
+           Posteriormente se agregan columnas totales tanto para victorias, empates y visitas
+        </p>
+        <h4><b>Partidos Totales</b></h4>
+        <pre>
+          team_stats = pd.merge(home_teams_goals, away_teams_goals, on='team', how='inner') # Se realiza un merge de ambos dataframes
+        </pre>
+        <pre>
+          # Se crean las columnas que suman las estadísticas de local y visitas de las selecciones 
+          team_stats['Total_Win'] = team_stats['Home_Win'] + team_stats['Away_Win']
+          team_stats['Total_Draw'] = team_stats['Home_Draw'] + team_stats['Away_Draw']
+          team_stats['Total_Lose'] = team_stats['Home_Lose'] + team_stats['Away_Lose']
+          team_stats['Total_Matches'] = team_stats['Total_Win'] + team_stats['Total_Draw'] + team_stats['Total_Lose']   
+        </pre>
+        <p>A continuación se ven los resultados del ejercicio. Es posible ver que muchos de estos equipos pueden no ser países propiamente
+          tal, sino más bien regiones, estados, minorías o selecciones ápatridas. Este tipo de equipos son
+          <a href="https://es.wikipedia.org/wiki/F%C3%BAtbol_independiente_de_la_FIFA">Independientes de la FIFA</a> y suelen disputar amistosos o Copas Independientes.
+          Por ejemplo, <a href="https://en.wikipedia.org/wiki/Abkhazia_national_football_team">La selección de Abkhazia</a>	ha disputado 28 
+          partidos internacionales, ganando 12, perdiendo 12 y empatando 4. Siendo <a href="https://es.wikipedia.org/wiki/Abjasia">Abkhazia</a> una república Independiente 
+          de Georgia, reconocida por sólo algunos países, disputa algunos partidos como selección y se encuentra en nuestros datos.
+        </p>
+        <p>
+        <figure>
+          <img src="img/teams-stats.jpg" alt="a"  />
+          <figcaption>Figura 9: Estadísticas de selecciones nacionales al 2022</figcaption>
+        </figure>
+        <p>  
+    </div>
+    <div class="container about-container wow fadeInUp">
+      <div class="row">
+        <div class="col-md-6 about-content">
+          <h2 class="about-title">Respondiendo preguntas de interés</h2>
+        </div>
+      </div>  
+      <p>
+        Con la data ya preprocesada, estamos listos para responder preguntas que pueden surgir de los datos, cómo por ejemplo: ¿qué selección
+        jugó más partidos? ¿quién ganó más? ¿quién tiene mejor porcentaje de victorias? ¿qué jugador es el más goleador del mundo? y muchas otras
+      </p> 
+      <h4><b>¿Qué selección nacional ha disputado más partidos?</b></h4>
+      <p>
+        Para contestar esta interrogante se utiliza el dataframe formado anteriormente (team_stats) en conjunto con la librería plotly_express. 
+        Se arma un gráfico de barras con el dataframe ordenado descendentemente por el número total de partidos (Total_Matches).
+      </p> 
+      <pre>
+        fig = px.bar(team_stats.sort_values(by='Total_Matches', ascending=False).head(10), x="team", y="Total_Matches", 
+              barmode='group', title="Top 10 de selecciones nacionales con mayor cantidad de partidos internacionales",
+             height=400, text="Total_Matches")
+
+        fig.show()
+      </pre>
+      <p>
+        <figure>
+          <img src="img/top-teams-matches.jpg" alt="a"  />
+          <figcaption>Figura 10: Top 10 Selecciones que más partidos disputaron de manera internacional</figcaption>
+        </figure>
+      <p>  
+      <p>
+        Tal como se puede ver en la Figura 10, y sorprendentemente para algunos, Suecia es la selección con más partidos jugados con 1053 encuentros
+        al 2022, seguido por Inglaterra y Brasil con 1049 y 1021 partidos respectivamente.
+      </p>
+    </div>  
   </section>
 
   <!--==========================
